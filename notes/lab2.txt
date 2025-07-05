@@ -1,0 +1,163 @@
+GCC & GDB Commands
+
+GCC:
+
+gcc -g program.c -o program   # compile with debug info
+./program                     # run it
+
+GDB:
+
+gdb ./program         # start debugger
+break main            # set breakpoint at main
+run                   # run the program
+next                  # step to next line (skip into functions)
+step                  # step into a function
+print x               # show value of variable x
+info registers        # see all CPU registers
+x/4xw &x              # examine memory at &x (hex, 4 words)
+
+Binary / Hex / Two’s Complement
+
+Hex → Binary: 0xF = 1111
+
+Binary → Decimal:
+
+Positive: regular base-2
+
+Negative (2’s comp): invert all bits, add 1, add negative sign
+
+Example: Convert -5 to 8-bit binary:
+
+5 = 00000101
+
+Invert = 11111010
+
+Add 1 = 11111011
+
+ARMv8 Instruction Cheatsheet
+
+Instruction
+
+Description
+
+mov x0, #5
+
+Move 5 into x0
+
+add x1, x2, x3
+
+x1 = x2 + x3
+
+sub x1, x2, x3
+
+x1 = x2 - x3
+
+mul x1, x2, x3
+
+x1 = x2 * x3
+
+udiv x1, x2, x3
+
+x1 = x2 / x3 (unsigned)
+
+eor x1, x2, x3
+
+Bitwise XOR
+
+and x1, x2, x3
+
+Bitwise AND
+
+orr x1, x2, x3
+
+Bitwise OR
+
+ret
+
+Return from function
+
+ARMv8 Practice Examples (Lab 2)
+
+part0.s
+
+mov x0, #0
+eor x1, x1, x1
+sub x2, x2, x2
+mov x3, xzr
+and x4, x4, xzr
+orr x5, x5, xzr
+
+Resets registers to zero.
+
+part1.s
+
+mov x0, #1
+mov x1, #4
+mov x3, #3
+mov x4, #2
+
+mul x5, x3, x1     // x5 = 12
+udiv x6, x5, x4    // x6 = 6
+add x2, x5, x0     // x2 = 13
+
+Basic multiply/divide/add chain.
+
+part2.s
+
+mov x2, #1
+mov x3, #2
+mov x4, #3
+
+eor x0, x2, x2     // 0
+eor x0, x0, x3     // 2
+eor x0, x0, x3     // 0
+eor x0, x0, x4     // 3
+
+Cycle values with XOR.
+
+part3.s
+
+mov x1, #6
+mov x2, #2
+mov x3, #1
+mov x4, #2
+
+add x5, x3, x4     // x5 = 3
+udiv x0, x1, x2    // x0 = 3
+mul x0, x0, x5     // x0 = 9
+
+Arithmetic expression chain.
+
+C to ARMv8 Example
+
+C Code:
+
+int x = 3, y = 2, z;
+z = (x + 1) * y;
+
+ARMv8:
+
+mov x0, #3
+mov x1, #2
+add x2, x0, #1     // x2 = 4
+mul x3, x2, x1     // x3 = 8
+
+Datapath Summary
+
+Instruction fetch: PC → Instruction Memory
+
+Control unit sets signals
+
+ALU does math
+
+Writeback to register/memory
+
+Common Paths:
+
+add: ALU result → register
+
+lw: Memory → register
+
+beq: ALU compares → PC updated
+
+

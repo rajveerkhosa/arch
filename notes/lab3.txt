@@ -1,0 +1,126 @@
+# Computer Architecture 3240 - Lab 3 Complete Study Notes (Fully Explained)
+
+=======================================
+PART 0: Immediate and Register Values
+=======================================
+.global _start
+_start:
+    mov x0, 0xffffffffffffffff    // Load -1 into 64-bit register x0 (all bits set to 1)
+    mov w0, 0xffffffff            // Load -1 into 32-bit register w0
+    mov x8, #93                   // syscall number 93 (exit)
+    ret                           // return (exits program)
+
+=======================================
+PART 1 (STATIC): Syscall + Memory Write/Read/Modify
+=======================================
+.global _start
+_start:
+    mov x8, 222                   // syscall number 222: mmap (allocate memory)
+    mov x0, 0                     // addr = NULL → let kernel choose
+    mov x1, 4                     // length = 4 bytes
+    mov x2, 7                     // PROT_READ | PROT_WRITE = 0x1 | 0x2 = 0x3 (read+write+exec?)
+    mov x3, 0x22                  // MAP_PRIVATE | MAP_ANONYMOUS
+    mov x4, 0                     // file descriptor (not used)
+    mov x5, 0                     // offset (not used)
+    svc 0                         // trigger syscall
+
+    mov x9, x0                    // save the returned pointer to mmap'd memory into x9
+
+    mov w0, 7                     // store value 7 into w0
+    str w0, [x9]                  // write 7 into the allocated memory
+
+    ldr w2, [x9]                  // read value back into w2
+    add w2, w2, #3                // add 3 → becomes 10
+    str w2, [x9]                  // write updated value back
+
+    mov x8, 215                   // syscall number 215: munmap (free memory)
+    mov x0, x9                    // address to free
+    mov x1, 16                    // length
+    svc 0                         // trigger syscall
+
+    mov x0, 0                     // exit code 0
+    ret                           // exit
+
+=======================================
+PART 2: Global Symbols, Arrays, and Modifying Elements
+=======================================
+.data
+.global badger
+badger:
+    .word 7                      // integer 7 in memory
+
+.global eagle
+eagle:
+    .word 0                      // integer 0 in memory
+
+.global coyote
+coyote:
+    .word 0                      // array: 0, 2, 4, 6, 8, 10
+    .word 2
+    .word 4
+    .word 6
+    .word 8
+    .word 10
+
+.global fox
+.comm fox, 200, 4                // reserve 200 bytes (aligned to 4) in the BSS section
+
+.section .rodata
+.global hello
+hello:
+    .asciz "Hello, world!\n"     // string stored in read-only data
+
+.text
+.global _start
+_start:
+    ldr x1, =coyote              // load address of array 'coyote' into x1
+    ldr w2, [x1, #8]             // load 3rd value (index 2 = offset 8) → value 4
+    add w2, w2, #100             // 4 + 100 = 104
+    str w2, [x1, #8]             // store 104 back at that same index
+
+    mov x0, #0                   // exit code
+    ret                          // exit
+
+=======================================
+BONUS: Full Array Copy From Global to Mapped Memory
+=======================================
+.global main
+main:
+    mov x8, 222                  // syscall: mmap (allocate memory)
+    mov x0, 0                    // addr = NULL
+    mov x1, 24                   // allocate 24 bytes (for 6 integers)
+    mov x2, 3                    // PROT_READ | PROT_WRITE
+    mov x3, 34                   // MAP_PRIVATE | MAP_ANONYMOUS
+    mov x4, -1                   // fd = -1
+    mov x5, 0                    // offset = 0
+    svc 0                        // syscall
+
+    mov x9, x0                   // store mmap pointer in x9
+    ldr x10, =coyote             // pointer to global array
+
+    ldr w1, [x10]                // copy 1st element (0)
+    str w1, [x9]                 // write to mmap'd region
+
+    ldr w1, [x10, #4]            // 2nd element (2)
+    str w1, [x9, #4]
+
+    ldr w1, [x10, #8]            // 3rd element (4)
+    str w1, [x9, #8]
+
+    ldr w1, [x10, #12]           // 4th element (6)
+    str w1, [x9, #12]
+
+    ldr w1, [x10, #16]           // 5th element (8)
+    str w1, [x9, #16]
+
+    ldr w1, [x10, #20]           // 6th element (10)
+    str w1, [x9, #20]
+
+    mov x8, 215                  // syscall: munmap
+    mov x0, x9                   // address
+    mov x1, 24                   // size
+    svc 0                        // syscall
+
+    mov x0, 0                    // exit code
+    ret
+
