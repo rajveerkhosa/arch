@@ -1,0 +1,26 @@
+Benchmark Results - CMPS 3240 SIMD Lab
+
+--------------------------------------------
+Unoptimized Version (faxpy.out)
+--------------------------------------------
+Trial 1: real    0m2.298s
+Trial 2: real    0m2.246s
+Trial 3: real    0m2.278s
+Average:  0m2.274s
+
+--------------------------------------------
+2-Lane SIMD Version (faxpySIMD2.out)
+--------------------------------------------
+Trial 1: real    0m2.462s
+Trial 2: real    0m2.136s
+Trial 3: real    0m2.158s
+Average:  0m2.252s
+
+--------------------------------------------
+4-Lane SIMD Version (faxpySIMD4.out)
+--------------------------------------------
+Trial 1: real    0m2.007s
+Trial 2: real    0m1.972s
+Trial 3: real    0m1.982s
+Average:  0m1.987s
+
